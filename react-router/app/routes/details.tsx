@@ -3,7 +3,7 @@ import type { Route } from "./+types/details";
 import { Card, CardContent } from "~/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate, isRouteErrorResponse } from "react-router";
 import { CalendarIcon, HomeIcon, MailIcon, PhoneIcon } from "lucide-react";
 import { useCallback } from "react";
 import { Link } from "react-router";
@@ -96,11 +96,31 @@ const useGoBack = (fallback: string) => {
   }, [location, fallback]);
 };
 
-export function ErrorBoundary() {
+export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  let message = "Oops!";
+  let details = "An unexpected error occurred.";
+  let stack: string | undefined;
+
+  if (isRouteErrorResponse(error)) {
+    message = error.status === 404 ? "404" : "Error";
+    details =
+      error.status === 404
+        ? "The requested member could not be found."
+        : error.statusText || details;
+  } else if (import.meta.env.DEV && error && error instanceof Error) {
+    details = error.message;
+    stack = error.stack;
+  }
+
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">Error</h1>
-      <p>Something went wrong.</p>
-    </div>
+    <main className="pt-16 p-4 container mx-auto">
+      <h1>{message}</h1>
+      <p>{details}</p>
+      {stack && (
+        <pre className="w-full p-4 overflow-x-auto">
+          <code>{stack}</code>
+        </pre>
+      )}
+    </main>
   );
 }

@@ -27,15 +27,6 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-// export async function clientLoader({
-//   request,
-//   serverLoader,
-// }: Route.ClientLoaderArgs) {
-//   // Debounce the filter form
-//   await abortableTimeout(400, request.signal);
-//   return await serverLoader();
-// }
-
 export default function Home({ loaderData }: Route.ComponentProps) {
   const { members, filter } = loaderData;
   const submit = useSubmit();
@@ -61,9 +52,17 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           </Form>
 
           <div className="grid @sm:grid-cols-2 @2xl:grid-cols-4 @4xl:grid-cols-5 gap-6">
-            {members.results.map((member) => (
-              <ContactCard member={member} key={member.login.uuid} />
-            ))}
+            {members.results.length === 0 ? (
+              <div className="col-span-full">
+                <p className="text-center text-muted-foreground">
+                  No members found.
+                </p>
+              </div>
+            ) : (
+              members.results.map((member) => (
+                <ContactCard member={member} key={member.login.uuid} />
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
